@@ -32,6 +32,12 @@ export const authService = {
     };
   },
 
+  async obterPerfil(id: number) {
+    const usuario = await usuarioRepository.buscarPorId(id);
+    if (!usuario) throw new AppError("Usuário não encontrado", 404);
+    return { id: usuario.id, nome: usuario.nome, email: usuario.email, papel: usuario.papel };
+  },
+
   async login(email: string, senha: string) {
     const usuario = await usuarioRepository.buscarPorEmail(email);
     if (!usuario) {

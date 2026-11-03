@@ -27,4 +27,8 @@ export const authController = {
     const resultado = await authService.login(email, senha);
     res.json(resultado);
   },
+
+  async me(req: Request, res: Response) {
+    res.json(await authService.obterPerfil(req.usuario!.id));
+  },
 };
