@@ -1,0 +1,143 @@
+// Schema do banco de dados - Bilheteria de Cinema
+// Prisma Client é gerado em TypeScript puro (ESM) em src/generated/prisma
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Papel {
+  CLIENTE
+  OPERADOR
+}
+
+enum StatusReserva {
+  RESERVADO
+  PAGO
+  EXPIRADA
+  CANCELADA
+}
+
+enum StatusIngresso {
+  VALIDO
+  UTILIZADO
+}
+
+model Usuario {
+  id         Int      @id @default(autoincrement())
+  nome       String
+  email      String   @unique
+  senhaHash  String
+  papel      Papel    @default(CLIENTE)
+  criadoEm   DateTime @default(now())
+
+  reservas Reserva[]
+  vendas   Venda[]
+
+  @@map("usuarios")
+}
+
+model Evento {
+  id              Int      @id @default(autoincrement())
+  titulo          String
+  descricao       String?
+  duracaoMinutos  Int
+  criadoEm        DateTime @default(now())
+
+  sessoes Sessao[]
+
+  @@map("eventos")
+}
+
+model Sala {
+  id       Int      @id @default(autoincrement())
+  nome     String
+  criadoEm DateTime @default(now())
+
+  assentos Assento[]
+  sessoes  Sessao[]
+
+  @@map("salas")
+}
+
+model Assento {
+  id      Int    @id @default(autoincrement())
+  salaId  Int
+  fila    String
+  numero  Int
+
+  sala     Sala      @relation(fields: [salaId], references: [id], onDelete: Cascade)
+  reservas Reserva[]
+
+  @@unique([salaId, fila, numero])
+  @@map("assentos")
+}
+
+model Sessao {
+  id       Int      @id @default(autoincrement())
+  eventoId Int
+  salaId   Int
+  dataHora DateTime
+  preco    Decimal  @db.Decimal(10, 2)
+  criadoEm DateTime @default(now())
+
+  evento   Evento    @relation(fields: [eventoId], references: [id], onDelete: Restrict)
+  sala     Sala      @relation(fields: [salaId], references: [id], onDelete: Restrict)
+  reservas Reserva[]
+
+  @@index([dataHora])
+  @@map("sessoes")
+}
+
+model Reserva {
+  id        Int           @id @default(autoincrement())
+  sessaoId  Int
+  assentoId Int
+  usuarioId Int
+  status    StatusReserva @default(RESERVADO)
+  expiraEm  DateTime
+  criadaEm  DateTime      @default(now())
+
+  sessao   Sessao    @relation(fields: [sessaoId], references: [id], onDelete: Restrict)
+  assento  Assento   @relation(fields: [assentoId], references: [id], onDelete: Restrict)
+  usuario  Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+  ingresso Ingresso?
+
+  // A unicidade do assento por sessão ativa (RESERVADO/PAGO) é garantida por
+  // um índice único parcial criado via SQL na migration (ver migration.sql),
+  // pois o Prisma não expressa índices parciais no schema.
+  @@index([status, expiraEm])
+  @@index([sessaoId, assentoId])
+  @@map("reservas")
+}
+
+model Venda {
+  id         Int      @id @default(autoincrement())
+  usuarioId  Int
+  valorTotal Decimal  @db.Decimal(10, 2)
+  criadaEm   DateTime @default(now())
+
+  usuario   Usuario    @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+  ingressos Ingresso[]
+
+  @@map("vendas")
+}
+
+model Ingresso {
+  id           Int            @id @default(autoincrement())
+  reservaId    Int            @unique
+  vendaId      Int
+  codigoUnico  String         @unique
+  status       StatusIngresso @default(VALIDO)
+  emitidoEm    DateTime       @default(now())
+  utilizadoEm  DateTime?
+
+  reserva Reserva @relation(fields: [reservaId], references: [id], onDelete: Restrict)
+  venda   Venda   @relation(fields: [vendaId], references: [id], onDelete: Restrict)
+
+  @@map("ingressos")
+}
