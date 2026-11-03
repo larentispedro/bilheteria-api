@@ -24,7 +24,9 @@ export const reservaRepository = {
    */
   async travarAssentosDaSessao(db: DB, sessaoId: number, assentoIds: number[]) {
     for (const assentoId of assentoIds.toSorted((a, b) => a - b)) {
-      await db.$queryRaw`SELECT pg_advisory_xact_lock(${sessaoId}, ${assentoId})`;
+      // $executeRaw (não $queryRaw): pg_advisory_xact_lock retorna "void", que o
+      // driver não consegue desserializar como resultado de uma consulta.
+      await db.$executeRaw`SELECT pg_advisory_xact_lock(${sessaoId}, ${assentoId})`;
     }
   },
 
