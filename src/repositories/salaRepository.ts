@@ -2,7 +2,12 @@ import { prisma } from "../config/prisma.ts";
 
 export const salaRepository = {
   listar() {
-    return prisma.sala.findMany({ orderBy: { nome: "asc" } });
+    // Os assentos vêm junto: o app usa a quantidade para saber se a sala já
+    // foi configurada e se pode receber sessões (ver docs/api.md).
+    return prisma.sala.findMany({
+      include: { assentos: true },
+      orderBy: { nome: "asc" },
+    });
   },
 
   buscarPorId(id: number) {
