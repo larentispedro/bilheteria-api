@@ -6,14 +6,24 @@ export const ingressoRepository = {
     return prisma.ingresso.findUnique({
       where: { codigoUnico },
       include: {
-        reserva: { include: { sessao: { include: { evento: true } }, assento: true, usuario: true } },
+        reserva: {
+          include: {
+            sessao: { include: { evento: true } },
+            assento: true,
+            usuario: { select: { id: true, nome: true, email: true } },
+          },
+        },
       },
     });
   },
 
+  /**
+   * Marca como utilizado só se ainda estiver VALIDO — `count` vem 0 se outra
+   * validação concorrente já tiver vencido essa corrida (ver ingressoService.validar).
+   */
   marcarUtilizado(id: number) {
-    return prisma.ingresso.update({
-      where: { id },
+    return prisma.ingresso.updateMany({
+      where: { id, status: StatusIngresso.VALIDO },
       data: { status: StatusIngresso.UTILIZADO, utilizadoEm: new Date() },
     });
   },

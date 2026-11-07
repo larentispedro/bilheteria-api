@@ -13,4 +13,12 @@ export const usuarioRepository = {
   buscarPorId(id: number) {
     return prisma.usuario.findUnique({ where: { id } });
   },
+
+  /** Lista usuários sem `senhaHash`, para a tela de gerência. */
+  listar() {
+    return prisma.usuario.findMany({
+      select: { id: true, nome: true, email: true, papel: true, criadoEm: true },
+      orderBy: { criadoEm: "desc" },
+    });
+  },
 };

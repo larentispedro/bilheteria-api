@@ -10,4 +10,8 @@ export const relatorioController = {
     const sessaoId = req.query.sessaoId ? Number(req.query.sessaoId) : undefined;
     res.json(await relatorioService.ocupacao(sessaoId));
   },
+
+  async vendasDetalhadas(_req: Request, res: Response) {
+    res.json(await relatorioService.vendasDetalhadas());
+  },
 };

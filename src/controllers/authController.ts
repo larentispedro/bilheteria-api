@@ -1,13 +1,11 @@
 import type { Request, Response } from "express";
 import { z } from "zod";
 import { authService } from "../services/authService.ts";
-import { Papel } from "../generated/prisma/enums.ts";
 
 const registrarSchema = z.object({
   nome: z.string().min(2),
   email: z.string().email(),
   senha: z.string().min(6),
-  papel: z.enum([Papel.CLIENTE, Papel.OPERADOR]).optional(),
 });
 
 const loginSchema = z.object({

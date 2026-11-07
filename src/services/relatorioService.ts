@@ -70,4 +70,10 @@ export const relatorioService = {
       };
     });
   },
+
+  /** Relatório gerencial em SQL puro: uma linha por ingresso vendido. */
+  async vendasDetalhadas() {
+    const linhas = await relatorioRepository.vendasDetalhadas();
+    return linhas.map((l) => ({ ...l, preco: Number(l.preco) }));
+  },
 };

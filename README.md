@@ -62,6 +62,22 @@ API REST em TypeScript/Node.js/Express, com Prisma ORM e PostgreSQL. Organizada 
   e emite os ingressos com código único — tudo atomicamente.
 - Ingresso só pode ser validado (marcado como utilizado) uma vez.
 
+### Onde está cada regra de negócio
+
+Toda regra abaixo é decidida e validada na camada de **service** (com tipagem TypeScript),
+que é quem devolve o erro correto (404/403/409/422) ao controller. O banco (índice único,
+trigger e stored procedure) existe só como proteção extra contra concorrência — não é onde a
+regra "mora".
+
+| Regra | Arquivo / função |
+| --- | --- |
+| Um assento não pode ser reservado/vendido duas vezes na mesma sessão | `src/services/reservaService.ts` → `criarReservas` |
+| Reserva expira em `RESERVA_EXPIRACAO_MINUTOS` minutos | `src/services/reservaService.ts` → `criarReservas` |
+| Pagamento só de reservas existentes, do próprio usuário, com status RESERVADO e não expiradas | `src/services/pagamentoService.ts` → `confirmarPagamento` |
+| Sessão só pode ser criada/alterada para evento e sala existentes, com sala já com assentos | `src/services/sessaoService.ts` → `validarEventoESala` |
+| Preço e data/hora da sessão devem ser válidos (preço > 0, data no futuro) | `src/services/sessaoService.ts` → `criar` / `atualizar` |
+| Ingresso só pode ser validado (marcado como utilizado) uma vez | `src/services/ingressoService.ts` → `validar` |
+
 ## Principais endpoints
 
 Ver `../docs/api.md` na raiz do trabalho para a lista completa.
@@ -72,9 +88,16 @@ O enunciado exige o backend rodando em produção (nuvem) com PostgreSQL gerenci
 para qualquer provedor (Render, Railway, Azure App Service, AWS, etc.):
 
 1. Provisione um banco PostgreSQL gerenciado e obtenha a `DATABASE_URL` de produção.
-2. Configure as variáveis de ambiente (`DATABASE_URL`, `JWT_SECRET`, `PORT`) no provedor escolhido.
+2. Configure as variáveis de ambiente (`DATABASE_URL`, `JWT_SECRET`, `PORT`, `NODE_ENV=production`)
+   no provedor escolhido.
 3. Rode as migrations contra o banco de produção: `npx prisma migrate deploy`.
-4. Inicie a aplicação com `npm start` (usa `tsx` para rodar o TypeScript diretamente).
+4. Popule só o operador padrão (sem dados de demonstração): com `NODE_ENV=production` já
+   configurado, `npm run seed` detecta o ambiente e pula filme/sala/sessão de exemplo — cria
+   só `operador@cinema.com` / `123456` (mesmas credenciais da seção "Configuração" acima).
+   Fora de produção, force o mesmo comportamento com `SEED_APENAS_OPERADOR=true npm run seed`.
+5. Inicie a aplicação com `npm start` (usa `tsx` para rodar o TypeScript diretamente).
+6. No frontend, configure `EXPO_PUBLIC_API_URL` com a URL pública desta API antes do build
+   (ver `../frontend/README.md`).
 
 Este repositório ainda não foi publicado em nenhum provedor — isso depende de credenciais de
 conta que só o responsável pelo trabalho possui.

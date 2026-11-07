@@ -6,6 +6,7 @@ import { sessaoRoutes } from "./sessaoRoutes.ts";
 import { pagamentoRoutes } from "./pagamentoRoutes.ts";
 import { ingressoRoutes } from "./ingressoRoutes.ts";
 import { relatorioRoutes } from "./relatorioRoutes.ts";
+import { usuarioRoutes } from "./usuarioRoutes.ts";
 
 export const routes = Router();
 
@@ -16,3 +17,4 @@ routes.use("/sessoes", sessaoRoutes);
 routes.use("/pagamentos", pagamentoRoutes);
 routes.use("/ingressos", ingressoRoutes);
 routes.use("/relatorios", relatorioRoutes);
+routes.use("/usuarios", usuarioRoutes);

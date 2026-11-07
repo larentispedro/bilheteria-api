@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { z } from "zod";
 import { sessaoService } from "../services/sessaoService.ts";
+import { idParam } from "../utils/idParam.ts";
 
 const sessaoSchema = z.object({
   eventoId: z.number().int().positive(),
@@ -15,7 +16,7 @@ export const sessaoController = {
   },
 
   async buscar(req: Request, res: Response) {
-    res.json(await sessaoService.buscarPorId(Number(req.params.id)));
+    res.json(await sessaoService.buscarPorId(idParam(req.params.id)));
   },
 
   async criar(req: Request, res: Response) {
@@ -25,15 +26,15 @@ export const sessaoController = {
 
   async atualizar(req: Request, res: Response) {
     const dados = sessaoSchema.partial().parse(req.body);
-    res.json(await sessaoService.atualizar(Number(req.params.id), dados));
+    res.json(await sessaoService.atualizar(idParam(req.params.id), dados));
   },
 
   async remover(req: Request, res: Response) {
-    await sessaoService.remover(Number(req.params.id));
+    await sessaoService.remover(idParam(req.params.id));
     res.status(204).send();
   },
 
   async mapaDeAssentos(req: Request, res: Response) {
-    res.json(await sessaoService.mapaDeAssentos(Number(req.params.id)));
+    res.json(await sessaoService.mapaDeAssentos(idParam(req.params.id)));
   },
 };

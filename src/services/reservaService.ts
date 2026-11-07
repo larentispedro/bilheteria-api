@@ -29,6 +29,11 @@ export const reservaService = {
       throw new AppError("Um ou mais assentos informados não pertencem a esta sessão", 422);
     }
 
+    // Regra de negócio: toda reserva expira em `RESERVA_EXPIRACAO_MINUTOS`
+    // minutos (padrão: 10) se o pagamento não for confirmado antes disso.
+    // Quem decide o prazo é o service; o banco só aplica esse prazo já
+    // calculado (ver trigger `trg_reserva_expira_antes_insert`, que libera o
+    // assento de uma reserva vencida antes de aceitar uma nova).
     const expiraEm = new Date(Date.now() + env.reservaExpiracaoMinutos * 60_000);
 
     const reservas = await prisma.$transaction(async (tx) => {
@@ -48,6 +53,11 @@ export const reservaService = {
       );
     });
 
-    return { reservas, expiraEm };
+    // O total é calculado aqui, não no app: a interface não deve expor um
+    // totalizador que ela mesma multiplicou, já que esse valor é controlado
+    // pela camada de negócio (preço da sessão × quantidade de assentos).
+    const valorTotal = Number(sessao.preco) * idsUnicos.length;
+
+    return { reservas, expiraEm, valorTotal };
   },
 };

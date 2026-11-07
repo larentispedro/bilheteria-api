@@ -8,3 +8,4 @@ export const relatorioRoutes = Router();
 relatorioRoutes.use(autenticar, exigirPapel(Papel.OPERADOR));
 relatorioRoutes.get("/vendas", relatorioController.vendas);
 relatorioRoutes.get("/ocupacao", relatorioController.ocupacao);
+relatorioRoutes.get("/vendas-detalhadas", relatorioController.vendasDetalhadas);

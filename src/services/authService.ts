@@ -12,7 +12,9 @@ function gerarToken(usuario: { id: number; papel: Papel }) {
 }
 
 export const authService = {
-  async registrar(dados: { nome: string; email: string; senha: string; papel?: Papel }) {
+  // Cadastro público: sempre cria CLIENTE. Criar um OPERADOR exige estar
+  // autenticado como OPERADOR — ver `usuarioService.criar`.
+  async registrar(dados: { nome: string; email: string; senha: string }) {
     const existente = await usuarioRepository.buscarPorEmail(dados.email);
     if (existente) {
       throw new AppError("Já existe um usuário cadastrado com este e-mail", 409);
@@ -23,7 +25,7 @@ export const authService = {
       nome: dados.nome,
       email: dados.email,
       senhaHash,
-      papel: dados.papel ?? Papel.CLIENTE,
+      papel: Papel.CLIENTE,
     });
 
     return {

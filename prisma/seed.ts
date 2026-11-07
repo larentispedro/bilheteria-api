@@ -2,6 +2,11 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../src/config/prisma.ts";
 import { Papel } from "../src/generated/prisma/enums.ts";
 
+// Em produção (ou com SEED_APENAS_OPERADOR=true) o seed cria só o usuário
+// operador — sem cliente, filme, sala ou sessão de demonstração.
+const apenasOperador =
+  process.env.NODE_ENV === "production" || process.env.SEED_APENAS_OPERADOR === "true";
+
 async function main() {
   const senhaHash = await bcrypt.hash("123456", 10);
 
@@ -15,6 +20,12 @@ async function main() {
       papel: Papel.OPERADOR,
     },
   });
+
+  if (apenasOperador) {
+    console.log("Seed concluído (modo produção: só o operador padrão).");
+    console.log(`Operador: operador@cinema.com / 123456 (id ${operador.id})`);
+    return;
+  }
 
   await prisma.usuario.upsert({
     where: { email: "cliente@teste.com" },

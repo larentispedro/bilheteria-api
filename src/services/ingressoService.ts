@@ -13,12 +13,23 @@ export const ingressoService = {
     return ingresso;
   },
 
-  /** Validação na entrada: marca o ingresso como utilizado (regra: só pode usar uma vez). */
+  /**
+   * Validação na entrada: marca o ingresso como utilizado.
+   *
+   * Regra de negócio: um ingresso só pode ser validado uma vez. A escrita no
+   * banco é condicionada ao status atual (`UPDATE ... WHERE status = 'VALIDO'`)
+   * e acontece atomicamente — isso evita que dois atendentes validando o
+   * mesmo ingresso ao mesmo tempo (ex.: duas catracas) os dois passem pela
+   * checagem antes de qualquer um escrever.
+   */
   async validar(codigoUnico: string) {
     const ingresso = await ingressoService.buscarPorCodigo(codigoUnico);
-    if (ingresso.status === StatusIngresso.UTILIZADO) {
+
+    const resultado = await ingressoRepository.marcarUtilizado(ingresso.id);
+    if (resultado.count === 0) {
       throw new AppError("Este ingresso já foi utilizado", 409);
     }
-    return ingressoRepository.marcarUtilizado(ingresso.id);
+
+    return { ...ingresso, status: StatusIngresso.UTILIZADO, utilizadoEm: new Date() };
   },
 };
