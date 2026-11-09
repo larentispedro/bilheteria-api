@@ -7,5 +7,7 @@ export const relatorioRoutes = Router();
 
 relatorioRoutes.use(autenticar, exigirPapel(Papel.OPERADOR));
 relatorioRoutes.get("/vendas", relatorioController.vendas);
+relatorioRoutes.get("/vendas/pdf", relatorioController.vendasPdf);
 relatorioRoutes.get("/ocupacao", relatorioController.ocupacao);
+relatorioRoutes.get("/ocupacao/pdf", relatorioController.ocupacaoPdf);
 relatorioRoutes.get("/vendas-detalhadas", relatorioController.vendasDetalhadas);
