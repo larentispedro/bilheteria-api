@@ -3,6 +3,8 @@
 API REST em TypeScript/Node.js/Express, com Prisma ORM e PostgreSQL. Organizada em camadas:
 `controllers` (HTTP + validação) → `services` (regras de negócio) → `repositories` (acesso ao banco via Prisma).
 
+Frontend (Expo/React Native): https://github.com/larentispedro/bilheteria-app
+
 ## Requisitos
 
 - Node.js 20+
@@ -40,6 +42,7 @@ API REST em TypeScript/Node.js/Express, com Prisma ORM e PostgreSQL. Organizada 
    ```
 
    Usuários criados: `operador@cinema.com` / `123456` e `cliente@teste.com` / `123456`.
+   Essas credenciais valem só para ambiente local — veja a seção "Produção" abaixo.
 
 5. Suba a API:
 
@@ -82,22 +85,35 @@ regra "mora".
 
 Ver `../docs/api.md` na raiz do trabalho para a lista completa.
 
-## Deploy em produção
+## Documentação
 
-O enunciado exige o backend rodando em produção (nuvem) com PostgreSQL gerenciado. Passos gerais
-para qualquer provedor (Render, Railway, Azure App Service, AWS, etc.):
+- [docs/der.md](docs/der.md) — diagrama entidade-relacionamento (DER)
+- [docs/casos-de-uso.md](docs/casos-de-uso.md) — diagrama e descrição dos casos de uso
+- [docs/api.md](docs/api.md) — definição completa dos endpoints da API
+
+## Produção
+
+Sistema em produção: **http://3.150.40.45**
+
+Arquitetura: uma única instância EC2 na AWS. O Nginx escuta na porta 80, serve o build web do
+frontend em `/` e repassa as requisições que chegam em `/api` para esta API (Express, porta
+3000) — por isso as rotas do Express continuam sem o prefixo `/api` no código (`/sessoes`,
+`/auth`, etc.), quem remove o prefixo é o Nginx. O banco é um PostgreSQL gerenciado no RDS,
+na mesma conta AWS.
+
+As credenciais do seed (`operador@cinema.com` / `123456`, seção "Configuração" acima) valem
+só para desenvolvimento local. Em produção, com `NODE_ENV=production`, `npm run seed` detecta
+o ambiente e cria apenas o usuário operador padrão, sem os dados de demonstração (cliente,
+filme, sala, sessão de exemplo). A senha de produção desse operador foi trocada manualmente
+depois do seed, direto no banco — ela não fica versionada em nenhum arquivo deste repositório.
+
+Passos gerais de deploy (válidos para qualquer provedor cloud):
 
 1. Provisione um banco PostgreSQL gerenciado e obtenha a `DATABASE_URL` de produção.
-2. Configure as variáveis de ambiente (`DATABASE_URL`, `JWT_SECRET`, `PORT`, `NODE_ENV=production`)
-   no provedor escolhido.
+2. Configure as variáveis de ambiente (`DATABASE_URL`, `JWT_SECRET`, `PORT`, `NODE_ENV=production`).
 3. Rode as migrations contra o banco de produção: `npx prisma migrate deploy`.
-4. Popule só o operador padrão (sem dados de demonstração): com `NODE_ENV=production` já
-   configurado, `npm run seed` detecta o ambiente e pula filme/sala/sessão de exemplo — cria
-   só `operador@cinema.com` / `123456` (mesmas credenciais da seção "Configuração" acima).
-   Fora de produção, force o mesmo comportamento com `SEED_APENAS_OPERADOR=true npm run seed`.
+4. Popule o operador padrão: `npm run seed` (com `NODE_ENV=production`, já pula os dados de
+   demonstração — fora de produção, force o mesmo comportamento com
+   `SEED_APENAS_OPERADOR=true npm run seed`).
 5. Inicie a aplicação com `npm start` (usa `tsx` para rodar o TypeScript diretamente).
-6. No frontend, configure `EXPO_PUBLIC_API_URL` com a URL pública desta API antes do build
-   (ver `../frontend/README.md`).
-
-Este repositório ainda não foi publicado em nenhum provedor — isso depende de credenciais de
-conta que só o responsável pelo trabalho possui.
+6. No frontend, configure `EXPO_PUBLIC_API_URL` antes do build (ver `../frontend/README.md`).
