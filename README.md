@@ -19,7 +19,7 @@ Frontend (Expo/React Native): https://github.com/larentispedro/bilheteria-app
    JWT_SECRET="um-segredo-qualquer"
    ```
 
-2. Instale as dependências (já feito neste repositório, mas se precisar):
+2. Instale as dependências:
 
    ```
    npm install
@@ -67,10 +67,11 @@ Frontend (Expo/React Native): https://github.com/larentispedro/bilheteria-app
 
 ### Onde está cada regra de negócio
 
-Toda regra abaixo é decidida e validada na camada de **service** (com tipagem TypeScript),
-que é quem devolve o erro correto (404/403/409/422) ao controller. O banco (índice único,
-trigger e stored procedure) existe só como proteção extra contra concorrência — não é onde a
-regra "mora".
+A regra é expressa e validada na camada de **service**, com tipagem TypeScript, que é quem
+devolve o erro adequado ao controller (404/403/409/422). O banco garante a atomicidade e a
+integridade sob concorrência, que a aplicação sozinha não consegue assegurar: duas requisições
+simultâneas passariam pela mesma validação no service antes de qualquer uma gravar. As duas
+camadas são complementares — uma explica a regra, a outra a torna inviolável.
 
 | Regra | Arquivo / função |
 | --- | --- |
@@ -79,11 +80,8 @@ regra "mora".
 | Pagamento só de reservas existentes, do próprio usuário, com status RESERVADO e não expiradas | `src/services/pagamentoService.ts` → `confirmarPagamento` |
 | Sessão só pode ser criada/alterada para evento e sala existentes, com sala já com assentos | `src/services/sessaoService.ts` → `validarEventoESala` |
 | Preço e data/hora da sessão devem ser válidos (preço > 0, data no futuro) | `src/services/sessaoService.ts` → `criar` / `atualizar` |
+| Sessão já ocorrida não é oferecida para venda | `src/services/sessaoService.ts` → `listar` |
 | Ingresso só pode ser validado (marcado como utilizado) uma vez | `src/services/ingressoService.ts` → `validar` |
-
-## Principais endpoints
-
-Ver `../docs/api.md` na raiz do trabalho para a lista completa.
 
 ## Documentação
 
