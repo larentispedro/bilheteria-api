@@ -15,6 +15,13 @@ Papéis: `CLIENTE` (padrão no autocadastro) e `OPERADOR` (bilheteria/gerência)
 | POST | `/auth/login` | - | Autentica. Body: `{ email, senha }`. Retorna `{ usuario, token }` |
 | GET | `/auth/me` | qualquer | Retorna o usuário autenticado |
 
+## Usuários (gestão de operadores)
+
+| Método | Rota | Auth | Descrição |
+|---|---|---|---|
+| GET | `/usuarios` | OPERADOR | Lista todos os usuários cadastrados |
+| POST | `/usuarios` | OPERADOR | Cria um usuário (cliente ou operador). Body: `{ nome, email, senha, papel }` |
+
 ## Filmes/Eventos
 
 | Método | Rota | Auth | Descrição |
@@ -40,13 +47,13 @@ Papéis: `CLIENTE` (padrão no autocadastro) e `OPERADOR` (bilheteria/gerência)
 
 | Método | Rota | Auth | Descrição |
 |---|---|---|---|
-| GET | `/sessoes` | - | Lista sessões (com evento e sala) |
+| GET | `/sessoes` | - | Lista sessões (com evento e sala). Cada sessão traz o booleano `encerrada` (calculado pelo service: `true` quando a sessão já ocorreu e não pode mais ser reservada) |
 | GET | `/sessoes/:id` | - | Detalhe de uma sessão |
 | POST | `/sessoes` | OPERADOR | Cria. Body: `{ eventoId, salaId, dataHora (ISO), preco }` |
 | PUT | `/sessoes/:id` | OPERADOR | Atualiza (campos parciais) |
 | DELETE | `/sessoes/:id` | OPERADOR | Remove |
 | GET | `/sessoes/:id/mapa-assentos` | - | Mapa de assentos da sessão: `[{ id, fila, numero, status }]`, `status` em `livre\|reservado\|vendido` |
-| POST | `/sessoes/:id/reservas` | qualquer | Reserva temporária. Body: `{ assentoIds: number[] }`. Retorna `{ reservas, expiraEm }` |
+| POST | `/sessoes/:id/reservas` | qualquer | Reserva temporária. Body: `{ assentoIds: number[] }`. Retorna `{ reservas, expiraEm, valorTotal }` (`valorTotal` calculado pelo service: preço da sessão × quantidade de assentos) |
 
 ## Pagamento
 
@@ -67,7 +74,10 @@ Papéis: `CLIENTE` (padrão no autocadastro) e `OPERADOR` (bilheteria/gerência)
 | Método | Rota | Auth | Descrição |
 |---|---|---|---|
 | GET | `/relatorios/vendas` | OPERADOR | Totais e detalhamento de vendas por sessão |
+| GET | `/relatorios/vendas/pdf` | OPERADOR | Mesmo relatório de vendas, em PDF (download) |
 | GET | `/relatorios/ocupacao` | OPERADOR | Taxa de ocupação por sessão. Query opcional `?sessaoId=` |
+| GET | `/relatorios/ocupacao/pdf` | OPERADOR | Mesmo relatório de ocupação, em PDF (download). Query opcional `?sessaoId=` |
+| GET | `/relatorios/vendas-detalhadas` | OPERADOR | Uma linha por ingresso vendido, com comprador, filme, sala, assento e código (JOIN de 8 tabelas em SQL puro) |
 
 ## Exemplo de fluxo completo (cliente)
 

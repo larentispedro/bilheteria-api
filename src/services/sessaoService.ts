@@ -18,8 +18,14 @@ async function validarEventoESala(eventoId: number, salaId: number) {
 }
 
 export const sessaoService = {
-  listar() {
-    return sessaoRepository.listar();
+  async listar() {
+    const sessoes = await sessaoRepository.listar();
+    // Regra de negócio: só o service decide se uma sessão ainda é vendável
+    // (a interface não deve inferir isso sozinha comparando datas).
+    return sessoes.map((sessao) => ({
+      ...sessao,
+      encerrada: sessao.dataHora.getTime() <= Date.now(),
+    }));
   },
 
   async buscarPorId(id: number) {
