@@ -29,8 +29,12 @@ Frontend (Expo/React Native): https://github.com/larentispedro/bilheteria-app
    trigger e a stored procedure usadas pelas regras de negócio:
 
    ```
+   createdb bilheteria
    npx prisma migrate dev
    ```
+
+   Se o comando `createdb` não existir na sua máquina, crie o banco pelo psql ou pelo
+   pgAdmin com `CREATE DATABASE bilheteria;`.
 
    Na primeira execução, o Prisma aplicará a migration já versionada em
    `prisma/migrations/20261103000000_init/migration.sql`.
@@ -114,4 +118,4 @@ Passos gerais de deploy (válidos para qualquer provedor cloud):
    demonstração — fora de produção, force o mesmo comportamento com
    `SEED_APENAS_OPERADOR=true npm run seed`).
 5. Inicie a aplicação com `npm start` (usa `tsx` para rodar o TypeScript diretamente).
-6. No frontend, configure `EXPO_PUBLIC_API_URL` antes do build (ver `../frontend/README.md`).
+6. No frontend, configure `EXPO_PUBLIC_API_URL` antes do build (ver o README do frontend em https://github.com/larentispedro/bilheteria-app).
