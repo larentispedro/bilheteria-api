@@ -3,6 +3,12 @@
 Modelo lógico implementado em `backend/prisma/schema.prisma` e materializado na migration
 `backend/prisma/migrations/20261103000000_init/migration.sql`.
 
+Diagrama gerado pelo DBeaver a partir do banco real (tabelas, tipos e chaves estrangeiras):
+
+![Diagrama ER](diagrama-er.png)
+
+Versão em Mermaid, com os nomes das relações:
+
 ```mermaid
 erDiagram
     USUARIO ||--o{ RESERVA : faz

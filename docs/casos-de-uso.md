@@ -3,6 +3,10 @@
 Três atores, dois papéis de sistema (`CLIENTE` e `OPERADOR` — Bilheteria e Gerência usam o
 mesmo papel `OPERADOR`, apenas em telas diferentes do mesmo app, conforme o enunciado).
 
+![Diagrama de casos de uso](casos-de-uso.png)
+
+Versão em Mermaid:
+
 ```mermaid
 flowchart LR
     Cliente([Cliente])
@@ -33,6 +37,7 @@ flowchart LR
         UC12((Cadastrar sessão))
         UC13((Consultar relatório de vendas))
         UC14((Consultar relatório de ocupação))
+        UC15((Cadastrar operadores))
     end
 
     Cliente --> UC1
@@ -56,6 +61,7 @@ flowchart LR
     Gerencia --> UC12
     Gerencia --> UC13
     Gerencia --> UC14
+    Gerencia --> UC15
 ```
 
 ## Descrição por ator
@@ -84,6 +90,8 @@ flowchart LR
 - **Cadastrar sessão**: associa um filme/evento a uma sala, define data/hora e preço.
 - **Consultar relatório de vendas**: total vendido, ingressos emitidos e detalhamento por sessão.
 - **Consultar relatório de ocupação**: percentual de assentos vendidos/reservados por sessão.
+- **Cadastrar operadores**: cria contas de operador (ou cliente) para a equipe; o autocadastro
+  público só cria clientes, então novos operadores só entram por aqui.
 
 ## Fluxos alternativos relevantes
 

@@ -89,25 +89,36 @@ camadas são complementares — uma explica a regra, a outra a torna inviolável
 
 ## Documentação
 
-- [docs/der.md](docs/der.md) — diagrama entidade-relacionamento (DER)
-- [docs/casos-de-uso.md](docs/casos-de-uso.md) — diagrama e descrição dos casos de uso
+- [docs/der.md](docs/der.md) — diagrama entidade-relacionamento (DER), com a imagem em
+  [docs/diagrama-er.png](docs/diagrama-er.png)
+- [docs/casos-de-uso.md](docs/casos-de-uso.md) — diagrama e descrição dos casos de uso, com a
+  imagem em [docs/casos-de-uso.png](docs/casos-de-uso.png)
 - [docs/api.md](docs/api.md) — definição completa dos endpoints da API
 
 ## Produção
 
-Sistema em produção: **http://3.150.40.45**
+- Sistema: **https://cinepass.agp.app.br**
+- Acesso alternativo, sem domínio: http://3.150.40.45
 
-Arquitetura: uma única instância EC2 na AWS. O Nginx escuta na porta 80, serve o build web do
-frontend em `/` e repassa as requisições que chegam em `/api` para esta API (Express, porta
-3000) — por isso as rotas do Express continuam sem o prefixo `/api` no código (`/sessoes`,
-`/auth`, etc.), quem remove o prefixo é o Nginx. O banco é um PostgreSQL gerenciado no RDS,
-na mesma conta AWS.
+Arquitetura: uma única instância EC2 na AWS. O Nginx escuta nas portas 80 e 443, serve o
+build web do frontend em `/` e repassa as requisições que chegam em `/api` para esta API
+(Express, porta 3000) — por isso as rotas do Express continuam sem o prefixo `/api` no
+código (`/sessoes`, `/auth`, etc.), quem remove o prefixo é o Nginx. O subdomínio
+`api.cinepass.agp.app.br` aponta para a mesma máquina e expõe a API sem prefixo algum. O
+banco é um PostgreSQL gerenciado no RDS, na mesma conta AWS, sem acesso público, só a
+instância EC2 alcança o banco.
+
+O certificado HTTPS é emitido pela Let's Encrypt através do certbot, com renovação
+automática.
 
 As credenciais do seed (`operador@cinema.com` / `123456`, seção "Configuração" acima) valem
 só para desenvolvimento local. Em produção, com `NODE_ENV=production`, `npm run seed` detecta
 o ambiente e cria apenas o usuário operador padrão, sem os dados de demonstração (cliente,
 filme, sala, sessão de exemplo). A senha de produção desse operador foi trocada manualmente
-depois do seed, direto no banco — ela não fica versionada em nenhum arquivo deste repositório.
+depois do seed, direto no banco e não fica versionada em nenhum arquivo deste repositório.
+
+Para testar como cliente, basta usar o "Cadastre-se" na tela de login: o cadastro público
+sempre cria um usuário com papel CLIENTE.
 
 Passos gerais de deploy (válidos para qualquer provedor cloud):
 
